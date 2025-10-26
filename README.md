@@ -1,5 +1,5 @@
 # Ring
-This is an implementation of webrings for Slack personal channels! Channels are sorted by their IDs, and each channel's descriptions should contain links to the previous and next redirect URL in the ring. 
+This is an implementation of webrings for Slack personal channels! Channels are sorted by their IDs, and each channel's descriptions should contain links to the previous and next redirect URL in the ring, like so: https://ring.sahil.ink/next/YOUR_SLUG and https://ring.sahil.ink/prev/YOUR_SLUG.
 
 It's live right now at https://ring.sahil.ink!
 
