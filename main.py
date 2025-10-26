@@ -1,6 +1,7 @@
 import os
 import yaml
 import logging
+import argparse
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 import uvicorn
@@ -52,16 +53,29 @@ async def version():
     # the repo hash is good enough
     return {"commit_hash": commit_hash}
 
-def run_web_server():
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+def run_web_server(socket_path=None, host="0.0.0.0", port=None):
+    if socket_path:
+        if os.path.exists(socket_path):
+            os.unlink(socket_path)
+        uvicorn.run(app, uds=socket_path)
+    else:
+        port = port or int(os.getenv("PORT", 8000))
+        uvicorn.run(app, host=host, port=port)
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--socket", type=str, help="Unix socket path to bind to (e.g., /tmp/ring.sock)")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)")
+    parser.add_argument("--port", type=int, help="Port to bind to (default: from PORT env var or 8000)")
+    
+    args = parser.parse_args()
+    
     logging.info("Starting Ring...")
     
     slack_thread = threading.Thread(target=start_slack_bot, daemon=True)
     slack_thread.start()
     
-    run_web_server()
+    run_web_server(socket_path=args.socket, host=args.host, port=args.port)
 
 if __name__ == "__main__":
     main()

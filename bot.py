@@ -33,7 +33,7 @@ def check_channel(slug, cid):
         logging.error(f"Error checking channel {cid}: {e}")
         return False
 
-@app.command("ring-validate")
+@app.command("/ring-validate")
 def ring_validate(ack, body):
     """Checks if the current channel is recognized in the ring and has both ring links in its description."""
     ack()
