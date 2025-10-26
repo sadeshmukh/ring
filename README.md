@@ -8,7 +8,14 @@ To add your Slack channel to the ring, submit a PR with an edit to `channels.yml
 
 ```yaml
 - channel_id: C1234567890
+  user_id: U0987654321
   slug: mychannel
-  added_by: U0987654321
 ```
 Your slug can be any unique identifier you choose - it will be used in the redirect URLs.
+
+## Checklist
+When submitting a PR to add your channel, please ensure you complete the following checklist:
+- [ ] I am a channel manager of the Slack personal channel I am adding.
+- [ ] I have added the correct `channel_id` and `user_id` in `channels.yml`.
+- [ ] I have added the `slug` I want for my channel in `channels.yml`.
+- [ ] I have added the correct previous and next redirect URLs in my channel's description.
