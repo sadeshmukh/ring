@@ -32,3 +32,6 @@ channels:
   - channel_id: "C07D59T49G9"
     user_id: "U079QLTJZ7H"
     slug: "devarsh"
+  - channel_id: "C08MFFNFZCL"
+    user_id: "U07EB2Y76DP"
+    slug: "fish"
