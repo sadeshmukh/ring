@@ -2,6 +2,7 @@
 This is an implementation of webrings for Hack Club Slack personal channels.
 
 Check it out: https://ring.sahil.ink
+
 Feel free to leave a star on the repo as well!
 
 ## More Info
@@ -18,6 +19,7 @@ To add your Slack channel to the ring, submit a PR with an edit to `channels.yml
   user_id: U0987654321
   slug: mychannel
 ```
+
 Your slug can be any unique identifier you choose - it will be used in the redirect URLs. Keep in mind the full URL will have to fit in your description, so keep it on the shorter side.
 
 ## Checklist
