@@ -11,6 +11,8 @@ dotenv.load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
+from channels import CHANNELS_MAP, CHANNEL_IDS, CHANNELS_DATA
+
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 
@@ -40,12 +42,7 @@ def ring_validate(ack, body):
     user_id = body["user_id"]
     channel_id = body["channel_id"]
 
-    with open("channels.yml", "r") as file:
-        channels_data = yaml.safe_load(file).get("channels", [])
-    
-    channels_map = {channel["channel_id"]: channel for channel in channels_data}
-
-    if channel_id not in channels_map:
+    if channel_id not in CHANNELS_MAP:
         client.chat_postEphemeral(
             channel=channel_id,
             user=user_id,
@@ -53,7 +50,7 @@ def ring_validate(ack, body):
         )
         return
 
-    slug = channels_map[channel_id]["slug"]
+    slug = CHANNELS_MAP[channel_id]["slug"]
     if check_channel(slug, channel_id):
         client.chat_postEphemeral(
             channel=channel_id,
@@ -76,10 +73,8 @@ def ring_validate_all(ack, body):
     user_id = body["user_id"]
     invalid_channels = [] # list: <#channel_id> managed by <@user_id>
 
-    with open("channels.yml", "r") as file:
-        channels_data = yaml.safe_load(file).get("channels", [])
     
-    for channel in channels_data:
+    for channel in CHANNELS_DATA:
         slug = channel["slug"]
         cid = channel["channel_id"]
         if not check_channel(slug, cid):

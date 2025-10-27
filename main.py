@@ -11,11 +11,13 @@ from bot import start_slack_bot, check_channel
 
 logging.basicConfig(level=logging.INFO)
 
-with open("channels.yml", "r") as file:
-    channels_data = yaml.safe_load(file).get("channels", [])
+from channels import CHANNELS_MAP, CHANNEL_IDS
+
+# with open("channels.yml", "r") as file:
+#     channels_data = yaml.safe_load(file).get("channels", [])
     
-channels_map = {channel["channel_id"]: channel for channel in channels_data}
-channel_ids = sorted(channels_map.keys())
+# CHANNELS_MAP = {channel["channel_id"]: channel for channel in channels_data}
+# CHANNEL_IDS = sorted(CHANNELS_MAP.keys())
 
 import subprocess
 commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
@@ -28,11 +30,11 @@ async def root():
 
 @app.get("/next/{slug}")
 async def next_ring(slug: str):
-    if not any(channels_map[i]["slug"] == slug for i in channel_ids):
+    if not any(CHANNELS_MAP[i]["slug"] == slug for i in CHANNEL_IDS):
         raise HTTPException(status_code=404, detail="Channel slug not found")
-    id = [i for i in channel_ids if channels_map[i]["slug"] == slug][0]
-    i = channel_ids.index(id) + 1
-    next_channel = channel_ids[i % len(channel_ids)]
+    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
+    i = CHANNEL_IDS.index(id) + 1
+    next_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)]
     slack_url = f"https://hackclub.slack.com/archives/{next_channel}"
 
     return RedirectResponse(url=slack_url, status_code=302)
@@ -40,11 +42,11 @@ async def next_ring(slug: str):
 @app.get("/prev/{slug}")
 async def prev_ring(slug: str):
 
-    if not any(channels_map[i]["slug"] == slug for i in channel_ids):
+    if not any(CHANNELS_MAP[i]["slug"] == slug for i in CHANNEL_IDS):
         raise HTTPException(status_code=404, detail="Channel slug not found")
-    id = [i for i in channel_ids if channels_map[i]["slug"] == slug][0]
-    i = channel_ids.index(id) - 1
-    prev_channel = channel_ids[i % len(channel_ids)] # works, because negative indices
+    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
+    i = CHANNEL_IDS.index(id) - 1
+    prev_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)] # works, because negative indices
     slack_url = f"https://hackclub.slack.com/archives/{prev_channel}"
     return RedirectResponse(url=slack_url, status_code=302)
 
