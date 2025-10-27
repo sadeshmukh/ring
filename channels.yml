@@ -17,3 +17,6 @@ channels:
   - channel_id: "C08KXGMKDAB"
     user_id: "U08AP4Z9S9F"
     slug: "samhith"
+  - channel_id: "C08T6CY7S10"
+    user_id: "U08R4KDL6UF"
+    slug: "raygen"
