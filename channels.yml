@@ -20,3 +20,6 @@ channels:
   - channel_id: "C08T6CY7S10"
     user_id: "U08R4KDL6UF"
     slug: "raygen"
+  - channel_id: "C07FFUNMXUG"
+    user_id: "U06UYA5GMB5"
+    slug: "jeremy-rambles"
