@@ -35,3 +35,6 @@ channels:
   - channel_id: "C08MFFNFZCL"
     user_id: "U07EB2Y76DP"
     slug: "fish"
+  - channel_id: "C08MA5UU1MF"
+    user_id: "U081X26F6EA"
+    slug: "basement"
