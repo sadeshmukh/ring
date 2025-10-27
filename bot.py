@@ -94,6 +94,35 @@ def ring_validate_all(ack, body):
             text=f"The following channels are missing ring links in their descriptions:\n{invalid_list}"
         )
 
+@app.command("/ring-links")
+def ring_links(ack, body):
+    """Provides the next and previous channel links in the ring."""
+    ack()
+    user_id = body["user_id"]
+    channel_id = body["channel_id"]
+
+    if channel_id not in CHANNELS_MAP:
+        client.chat_postEphemeral(
+            channel=channel_id,
+            user=user_id,
+            text="This channel is not part of the ring."
+        )
+        return
+
+    slug = CHANNELS_MAP[channel_id]["slug"]
+    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
+    i = CHANNEL_IDS.index(id)
+    next_channel = CHANNEL_IDS[(i + 1) % len(CHANNEL_IDS)]
+    next_slack_url = f"<#{next_channel}>"
+    prev_channel = CHANNEL_IDS[(i - 1) % len(CHANNEL_IDS)]
+    prev_slack_url = f"<#{prev_channel}>"
+
+    client.chat_postEphemeral(
+        channel=channel_id,
+        user=user_id,
+        text=f"{prev_slack_url} <|> {next_slack_url}"
+    )
+
 def start_slack_bot():
     logging.info("Starting Slack bot...")
     handler.start()
