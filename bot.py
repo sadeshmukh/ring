@@ -5,6 +5,7 @@ import logging
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
+import random
 
 import dotenv
 dotenv.load_dotenv()
@@ -121,6 +122,21 @@ def ring_links(ack, body):
         channel=channel_id,
         user=user_id,
         text=f"{prev_slack_url} <|> {next_slack_url}"
+    )
+
+@app.command("/ring-random")
+def ring_random(ack, body):
+    """Provides a random channel link in the ring."""
+    ack()
+    user_id = body["user_id"]
+    channel_id = body["channel_id"]
+
+    random_channel = random.choice(CHANNEL_IDS)
+
+    client.chat_postEphemeral(
+        channel=channel_id,
+        user=user_id,
+        text=f"Here's a random channel in the ring: <#{random_channel}>"
     )
 
 def start_slack_bot():
