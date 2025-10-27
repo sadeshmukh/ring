@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 import uvicorn
 import threading
+import random
 
 from bot import start_slack_bot, check_channel
 
@@ -48,6 +49,12 @@ async def prev_ring(slug: str):
     i = CHANNEL_IDS.index(id) - 1
     prev_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)] # works, because negative indices
     slack_url = f"https://hackclub.slack.com/archives/{prev_channel}"
+    return RedirectResponse(url=slack_url, status_code=302)
+
+@app.get("/random")
+async def random_ring():
+    random_channel = random.choice(CHANNEL_IDS)
+    slack_url = f"https://hackclub.slack.com/archives/{random_channel}"
     return RedirectResponse(url=slack_url, status_code=302)
 
 @app.get("/version")
