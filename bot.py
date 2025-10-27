@@ -69,6 +69,36 @@ def ring_validate(ack, body):
             text=f"One or both ring links are missing in the channel description: {next_link}, {prev_link}"
         )
 
+@app.command("/ring-validate-all")
+def ring_validate_all(ack, body):
+    """Checks which channels aren't recognized in the ring or aren't currently valid."""
+    ack()
+    user_id = body["user_id"]
+    invalid_channels = [] # list: <#channel_id> managed by <@user_id>
+
+    with open("channels.yml", "r") as file:
+        channels_data = yaml.safe_load(file).get("channels", [])
+    
+    for channel in channels_data:
+        slug = channel["slug"]
+        cid = channel["channel_id"]
+        if not check_channel(slug, cid):
+            invalid_channels.append(f"<#{cid}> managed by <@{channel['user_id']}>")
+
+    if not invalid_channels:
+        client.chat_postEphemeral(
+            channel=body["channel_id"],
+            user=user_id,
+            text="All channels are properly configured!"
+        )
+    else:
+        invalid_list = "\n".join(invalid_channels)
+        client.chat_postEphemeral(
+            channel=body["channel_id"],
+            user=user_id,
+            text=f"The following channels are missing ring links in their descriptions:\n{invalid_list}"
+        )
+
 def start_slack_bot():
     logging.info("Starting Slack bot...")
     handler.start()
