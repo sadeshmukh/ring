@@ -46,7 +46,7 @@ def ring_validate(ack, body):
         client.chat_postEphemeral(
             channel=channel_id,
             user=user_id,
-            text="This channel is not part of the ring."
+            text="This channel is not part of the ring, but it could be! Join <#C09NLGSU5U3> and take a look at <https://hackclub.slack.com/docs/T0266FRGM/F09NCDL31AT|this canvas> to get your channel added."
         )
         return
 
@@ -105,7 +105,7 @@ def ring_links(ack, body):
         client.chat_postEphemeral(
             channel=channel_id,
             user=user_id,
-            text="This channel is not part of the ring."
+            text="This channel is not part of the ring, but it could be! Join <#C09NLGSU5U3> and take a look at <https://hackclub.slack.com/docs/T0266FRGM/F09NCDL31AT|this canvas> to get your channel added."
         )
         return
 
