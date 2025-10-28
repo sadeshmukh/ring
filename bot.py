@@ -31,7 +31,10 @@ def check_channel(slug, cid):
         channel_data = response.get("channel", {})
         purpose = channel_data.get("purpose", {})
         description = purpose.get("value", "") if purpose else ""
-        return next_link in description and prev_link in description
+
+        topic_raw = channel_data.get("topic", {})
+        topic = topic_raw.get("value", "") if topic_raw else ""
+        return (next_link in description and prev_link in description) or (next_link in topic and prev_link in topic)
     except Exception as e:
         logging.error(f"Error checking channel {cid}: {e}")
         return False
