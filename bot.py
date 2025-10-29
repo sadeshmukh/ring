@@ -6,6 +6,8 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 import random
+import re
+
 
 import dotenv
 dotenv.load_dotenv()
@@ -17,6 +19,8 @@ from channels import CHANNELS_MAP, CHANNEL_IDS, CHANNELS_DATA
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 
+command_prefix = "/ring-" if not (os.getenv("DEV") == "true") else "/dev-ring-"
+
 app = App(token=SLACK_BOT_TOKEN)
 client = WebClient(token=SLACK_BOT_TOKEN) 
 
@@ -24,8 +28,6 @@ handler = SocketModeHandler(app, SLACK_APP_TOKEN)
 
 def check_channel(slug, cid):
     """Checks whether link exists in channel description"""
-    next_link = f"{os.getenv('BASE_URL')}/next/{slug}"
-    prev_link = f"{os.getenv('BASE_URL')}/prev/{slug}"
     try:
         response = client.conversations_info(channel=cid)
         channel_data = response.get("channel", {})
@@ -34,12 +36,17 @@ def check_channel(slug, cid):
 
         topic_raw = channel_data.get("topic", {})
         topic = topic_raw.get("value", "") if topic_raw else ""
-        return (next_link in description and prev_link in description) or (next_link in topic and prev_link in topic)
+        idx = str(CHANNELS_MAP[cid]["idx"])
+        content = topic + description
+        # matches full URLs with any domain, followed by nav/{slug|idx}
+        # nav can be next, n, prev, or p
+        pattern = rf"[a-zA-Z0-9.-]+\.[a-zA-Z]+/(?:next|n|prev|p)/({re.escape(slug)}|{re.escape(idx)})"
+        return bool(re.search(pattern, content))
     except Exception as e:
         logging.error(f"Error checking channel {cid}: {e}")
         return False
 
-@app.command("/ring-validate")
+@app.command(command_prefix + "validate")
 def ring_validate(ack, body):
     """Checks if the current channel is recognized in the ring and has both ring links in its description."""
     ack()
@@ -70,7 +77,7 @@ def ring_validate(ack, body):
             text=f"One or both ring links are missing in the channel description: {next_link}, {prev_link}"
         )
 
-@app.command("/ring-validate-all")
+@app.command(command_prefix + "validate-all")
 def ring_validate_all(ack, body):
     """Checks which channels aren't recognized in the ring or aren't currently valid."""
     ack()
@@ -98,7 +105,7 @@ def ring_validate_all(ack, body):
             text=f"The following channels are missing ring links in their descriptions:\n{invalid_list}"
         )
 
-@app.command("/ring-links")
+@app.command(command_prefix + "links")
 def ring_links(ack, body):
     """Provides the next and previous channel links in the ring."""
     ack()
@@ -126,10 +133,10 @@ def ring_links(ack, body):
     client.chat_postEphemeral(
         channel=channel_id,
         user=user_id,
-        text=f"[ID: {channel_idx}] {prev_slack_url} <|> {next_slack_url}"
+        text=f" {prev_slack_url} <[{channel_idx}]> {next_slack_url}"
     )
 
-@app.command("/ring-random")
+@app.command(command_prefix + "random")
 def ring_random(ack, body):
     """Provides a random channel link in the ring."""
     ack()
