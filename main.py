@@ -22,6 +22,10 @@ from channels import CHANNELS_MAP, CHANNEL_IDS
 
 import subprocess
 commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
+last_commit_date = subprocess.check_output(["git", "log", "-1", "--format=%cd"]).strip().decode("utf-8")
+
+logging.info(f"Loaded {len(CHANNEL_IDS)} channels into the ring.")
+logging.info(f"Running on commit {commit_hash} updated at {last_commit_date}")
 
 app = FastAPI(title="Ring")
 
@@ -29,24 +33,37 @@ app = FastAPI(title="Ring")
 async def root():
     return {"message": "the all new Slack Ring"}
 
-@app.get("/next/{slug}")
-async def next_ring(slug: str):
-    if not any(CHANNELS_MAP[i]["slug"] == slug for i in CHANNEL_IDS):
-        raise HTTPException(status_code=404, detail="Channel slug not found")
-    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
-    i = CHANNEL_IDS.index(id) + 1
+@app.get("/next/{identifier}")
+async def next_ring(identifier: str):
+    try: # use as int, otherwise treat as slug
+        idx = int(identifier)
+        if not any(CHANNELS_MAP[i]["idx"] == idx for i in CHANNEL_IDS):
+            raise HTTPException(status_code=404, detail="Channel index not found")
+        cid = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["idx"] == idx][0]
+    except ValueError:
+        if not any(CHANNELS_MAP[i]["slug"] == identifier for i in CHANNEL_IDS):
+            raise HTTPException(status_code=404, detail="Channel slug not found")
+        cid = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == identifier][0]
+    
+    i = CHANNEL_IDS.index(cid) + 1
     next_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)]
     slack_url = f"https://hackclub.slack.com/archives/{next_channel}"
 
     return RedirectResponse(url=slack_url, status_code=302)
 
-@app.get("/prev/{slug}")
-async def prev_ring(slug: str):
-
-    if not any(CHANNELS_MAP[i]["slug"] == slug for i in CHANNEL_IDS):
-        raise HTTPException(status_code=404, detail="Channel slug not found")
-    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
-    i = CHANNEL_IDS.index(id) - 1
+@app.get("/prev/{identifier}")
+async def prev_ring(identifier: str):
+    try: # use as int, otherwise treat as slug
+        idx = int(identifier)
+        if not any(CHANNELS_MAP[i]["idx"] == idx for i in CHANNEL_IDS):
+            raise HTTPException(status_code=404, detail="Channel index not found")
+        cid = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["idx"] == idx][0]
+    except ValueError:
+        if not any(CHANNELS_MAP[i]["slug"] == identifier for i in CHANNEL_IDS):
+            raise HTTPException(status_code=404, detail="Channel slug not found")
+        cid = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == identifier][0]
+    
+    i = CHANNEL_IDS.index(cid) - 1
     prev_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)] # works, because negative indices
     slack_url = f"https://hackclub.slack.com/archives/{prev_channel}"
     return RedirectResponse(url=slack_url, status_code=302)
@@ -60,7 +77,7 @@ async def random_ring():
 @app.get("/version")
 async def version():
     # the repo hash is good enough
-    return {"commit_hash": commit_hash}
+    return {"commit_hash": commit_hash, "updated_at": last_commit_date}
 
 def run_web_server(socket_path=None, host="0.0.0.0", port=None):
     if socket_path:

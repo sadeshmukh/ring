@@ -113,9 +113,11 @@ def ring_links(ack, body):
         )
         return
 
-    slug = CHANNELS_MAP[channel_id]["slug"]
-    id = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
-    i = CHANNEL_IDS.index(id)
+    channel_info = CHANNELS_MAP[channel_id]
+    slug = channel_info["slug"]
+    channel_idx = channel_info["idx"]
+    cid = [i for i in CHANNEL_IDS if CHANNELS_MAP[i]["slug"] == slug][0]
+    i = CHANNEL_IDS.index(cid)
     next_channel = CHANNEL_IDS[(i + 1) % len(CHANNEL_IDS)]
     next_slack_url = f"<#{next_channel}>"
     prev_channel = CHANNEL_IDS[(i - 1) % len(CHANNEL_IDS)]
@@ -124,7 +126,7 @@ def ring_links(ack, body):
     client.chat_postEphemeral(
         channel=channel_id,
         user=user_id,
-        text=f"{prev_slack_url} <|> {next_slack_url}"
+        text=f"[ID: {channel_idx}] {prev_slack_url} <|> {next_slack_url}"
     )
 
 @app.command("/ring-random")
