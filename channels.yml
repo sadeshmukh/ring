@@ -44,3 +44,6 @@ channels:
   - channel_id: "C09BTQP6T5K"
     user_id: "U09192704Q7"
     slug: "arca"
+  - channel_id: "C09KB5MT6N6"
+    user_id: "U091HG1TP6K"
+    slug: "kyle"
