@@ -1,16 +1,22 @@
 # Ring
 
-This is an implementation of webrings for Hack Club Slack personal channels.
+The Slack Ring is an webring for Hack Club Slack personal channels.
 
-Check it out: https://ring.sahil.ink
+Check it out: `https://r.sahil.ink/next/sahil` or try `/ring-random` on the Hack Club Slack.
 
 Feel free to leave a star on the repo as well!
 
-## More Info
+## What exactly is this?
 
-Channels are sorted by their IDs, and each channel's descriptions contains links to the previous and next redirect URL in the ring, like so: https://ring.sahil.ink/next/slug and https://ring.sahil.ink/prev/slug. This way, the entire list of channels forms a ring. In the future, there are plans to visualize the entire ring on the home page.
+Each channel's descriptions contains links to the previous and next redirect URL in the ring, like so: https://r.sahil.ink/n/slug and https://r.sahil.ink/p/slug. This way, the entire list of channels forms a ring! For more info, check the [Slack channel](https://hackclub.slack.com/archives/C09NLGSU5U3) and [Canvas](https://hackclub.slack.com/docs/T0266FRGM/F09NCDL31AT) for more information.
 
-The server is automatically updated every fifteen minutes. You can check the current commit by visiting /version.
+Commits are automatically pushed to r.sahil.ink every fifteen minutes. You can check the current commit by visiting /version.
+
+## Commands
+The webring is bundled with a Slack bot! Here are the available commands:
+- /ring-links: Get the previous and next links when in a ring channel and provide the ring ID
+- /ring-random: Jump to a random ring channel
+- /ring-validate: Validate the current channel's links and provide them if not found
 
 ## Adding Your Channel
 
@@ -24,11 +30,4 @@ To add your Slack channel to the ring, submit a PR with an edit to `channels.yml
 
 Your slug can be any unique identifier you choose, as long as it is not entirely a number. Keep in mind the full URL will have to fit in your description, so keep it on the shorter side.
 
-## Checklist
-
-When submitting a PR to add your channel, please ensure you complete the following checklist:
-
-- [ ] I am a channel manager of the Slack personal channel I am adding.
-- [ ] I have added the correct `channel_id` and `user_id` in `channels.yml`.
-- [ ] I have added the `slug` I want for my channel in `channels.yml`.
-- [ ] I have added the correct previous and next redirect URLs in my channel's description (https://ring.sahil.ink/next/slug and https://ring.sahil.ink/prev/slug)
+Make sure to view the instructions upon opening a PR (`.github/pull_request_template.md`).
