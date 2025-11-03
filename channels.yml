@@ -47,3 +47,6 @@ channels:
   - channel_id: "C09KB5MT6N6"
     user_id: "U091HG1TP6K"
     slug: "kyle"
+  - channel_id: "C09AVL40CSC"
+    user_id: "U091VPT4KK8"
+    slug: "ali"
