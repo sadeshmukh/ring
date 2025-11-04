@@ -2,13 +2,14 @@ import os
 import yaml
 import logging
 import argparse
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import uvicorn
 import threading
 import random
 
 from bot import start_slack_bot, check_channel
+from statslog import log_web
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,7 +32,7 @@ app = FastAPI(title="Ring")
 
 @app.get("/")
 def root():
-    return {"message": "website coming soon!"}
+    return {"message": "website coming soon! in the meantime, check /random to get started."}
 
 def get_channel_by_identifier(identifier: str):
     try:  # use as int, otherwise treat as slug
@@ -46,26 +47,32 @@ def get_channel_by_identifier(identifier: str):
 
 @app.get("/next/{identifier}")
 @app.get("/n/{identifier}")
-def next_ring(identifier: str):
+def next_ring(identifier: str, request: Request):
     cid = get_channel_by_identifier(identifier)
+    current_slug = CHANNELS_MAP[cid]["slug"]
     i = CHANNEL_IDS.index(cid) + 1
     next_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)]
     slack_url = f"https://hackclub.slack.com/archives/{next_channel}"
+    
+    log_web(str(request.url), current_slug, "next", destination=CHANNELS_MAP[next_channel]["slug"])
     return RedirectResponse(url=slack_url, status_code=302)
 
 @app.get("/prev/{identifier}")
 @app.get("/p/{identifier}")
-def prev_ring(identifier: str):
+def prev_ring(identifier: str, request: Request):
     cid = get_channel_by_identifier(identifier)
+    current_slug = CHANNELS_MAP[cid]["slug"]
     i = CHANNEL_IDS.index(cid) - 1
     prev_channel = CHANNEL_IDS[i % len(CHANNEL_IDS)]  # works because negative indices
     slack_url = f"https://hackclub.slack.com/archives/{prev_channel}"
+    log_web(str(request.url), current_slug, "prev", destination=CHANNELS_MAP[prev_channel]["slug"])
     return RedirectResponse(url=slack_url, status_code=302)
 
 @app.get("/random")
-def random_ring():
+def random_ring(request: Request):
     random_channel = random.choice(CHANNEL_IDS)
     slack_url = f"https://hackclub.slack.com/archives/{random_channel}"
+    log_web(str(request.url), "random", "random", destination=CHANNELS_MAP[random_channel]["slug"])
     return RedirectResponse(url=slack_url, status_code=302)
 
 @app.get("/version")

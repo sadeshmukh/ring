@@ -15,6 +15,7 @@ dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 from channels import CHANNELS_MAP, CHANNEL_IDS, CHANNELS_DATA
+from statslog import log_slack
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
@@ -130,6 +131,8 @@ def ring_links(ack, body):
     prev_channel = CHANNEL_IDS[(i - 1) % len(CHANNEL_IDS)]
     prev_slack_url = f"<#{prev_channel}>"
 
+    log_slack(slug, random=False)
+
     client.chat_postEphemeral(
         channel=channel_id,
         user=user_id,
@@ -144,6 +147,8 @@ def ring_random(ack, body):
     channel_id = body["channel_id"]
 
     random_channel = random.choice(CHANNEL_IDS)
+
+    log_slack("random", random=True, destination=CHANNELS_MAP[random_channel]["slug"])
 
     client.chat_postEphemeral(
         channel=channel_id,
