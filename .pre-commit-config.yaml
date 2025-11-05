@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-channels-yml
+        name: Validate channels.yml
+        entry: python scripts/check_channels.py
+        language: python
+        files: ^channels\.yml$
+        additional_dependencies: ["pyyaml>=6.0.3"]
