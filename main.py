@@ -2,8 +2,10 @@ import os
 import yaml
 import logging
 import argparse
+import json
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 import uvicorn
 import threading
 import random
@@ -13,7 +15,9 @@ from statslog import log_web
 
 logging.basicConfig(level=logging.INFO)
 
-from channels import CHANNELS_MAP, CHANNEL_IDS
+from channels import CHANNELS_MAP, CHANNEL_IDS, CHANNELS_DATA
+
+templates = Jinja2Templates(directory="templates")
 
 # with open("channels.yml", "r") as file:
 #     channels_data = yaml.safe_load(file).get("channels", [])
@@ -30,9 +34,13 @@ logging.info(f"Running on commit {commit_hash} updated at {last_commit_date}")
 
 app = FastAPI(title="Ring")
 
-@app.get("/")
-def root():
-    return {"message": "website coming soon! in the meantime, check /random to get started."}
+@app.get("/", response_class=HTMLResponse)
+def root(request: Request):
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "channel_count": len(CHANNEL_IDS),
+        "channels_json": json.dumps(CHANNELS_DATA[3:] + CHANNELS_DATA[:3])
+    })
 
 def get_channel_by_identifier(identifier: str):
     try:  # use as int, otherwise treat as slug
@@ -73,6 +81,14 @@ def random_ring(request: Request):
     random_channel = random.choice(CHANNEL_IDS)
     slack_url = f"https://hackclub.slack.com/archives/{random_channel}"
     log_web(str(request.url), "random", "random", destination=CHANNELS_MAP[random_channel]["slug"])
+    return RedirectResponse(url=slack_url, status_code=302)
+
+@app.get("/at/{identifier}")
+def at_channel(identifier: str, request: Request):
+    cid = get_channel_by_identifier(identifier)
+    current_slug = CHANNELS_MAP[cid]["slug"]
+    slack_url = f"https://hackclub.slack.com/archives/{cid}"
+    log_web(str(request.url), current_slug, "at", destination=current_slug)
     return RedirectResponse(url=slack_url, status_code=302)
 
 @app.get("/version")

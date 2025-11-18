@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slack Ring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #0a0a0a;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0e0;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #ring-viz {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .channel-box {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .channel-box:hover rect {
+            fill: #ff6b35;
+        }
+        
+        .channel-label {
+            pointer-events: none;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .ring-link {
+            stroke: #333;
+            stroke-width: 2;
+        }
+        
+        .random-btn {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .random-btn:hover circle {
+            fill: #ff6b35;
+        }
+        
+        .random-btn:hover text {
+            fill: #0a0a0a;
+        }
+    </style>
+</head>
+<body>
+    <svg id="ring-viz" viewBox="0 0 900 900"></svg>
+    
+    <script>
+        const channels = {{ channels_json|safe }};
+        const svg = document.getElementById('ring-viz');
+        
+        const size = Math.min(window.innerWidth, window.innerHeight);
+        svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+        
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = size * 0.36;
+        const boxWidth = size * 0.09;
+        const boxHeight = size * 0.033;
+        
+        const colors = ['#4ecdc4', '#44a8f5', '#a66cff', '#ff6b9d', '#ffbe0b', '#06ffa5'];
+        
+        channels.forEach((channel, index) => {
+            const angle = (index / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            
+            const nextIndex = (index + 1) % channels.length;
+            const nextAngle = (nextIndex / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const nextX = centerX + radius * Math.cos(nextAngle);
+            const nextY = centerY + radius * Math.sin(nextAngle);
+            
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x);
+            line.setAttribute('y1', y);
+            line.setAttribute('x2', nextX);
+            line.setAttribute('y2', nextY);
+            line.classList.add('ring-link');
+            svg.appendChild(line);
+        });
+        
+        channels.forEach((channel, index) => {
+            const angle = (index / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            
+            const a = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+            a.setAttribute('href', `/at/${channel.slug}`);
+            
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.classList.add('channel-box');
+            
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x - boxWidth / 2);
+            rect.setAttribute('y', y - boxHeight / 2);
+            rect.setAttribute('width', boxWidth);
+            rect.setAttribute('height', boxHeight);
+            rect.setAttribute('fill', colors[index % colors.length]);
+            rect.setAttribute('rx', '4');
+            
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y + 4);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#0a0a0a');
+            text.classList.add('channel-label');
+            text.textContent = channel.slug.length > 10 ? channel.slug.substring(0, 9) + '…' : channel.slug;
+            
+            g.appendChild(rect);
+            g.appendChild(text);
+            a.appendChild(g);
+            
+            svg.appendChild(a);
+        });
+        
+        const randomBtnLink = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+        randomBtnLink.setAttribute('href', '/random');
+        
+        const randomBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        randomBtn.classList.add('random-btn');
+        
+        const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        btnCircle.setAttribute('cx', centerX);
+        btnCircle.setAttribute('cy', centerY);
+        btnCircle.setAttribute('r', '60');
+        btnCircle.setAttribute('fill', '#e0e0e0');
+        
+        const btnText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        btnText.setAttribute('x', centerX);
+        btnText.setAttribute('y', centerY + 6);
+        btnText.setAttribute('text-anchor', 'middle');
+        btnText.setAttribute('fill', '#0a0a0a');
+        btnText.setAttribute('font-size', '18');
+        btnText.setAttribute('font-weight', 'bold');
+        btnText.textContent = 'RANDOM';
+        
+        randomBtn.appendChild(btnCircle);
+        randomBtn.appendChild(btnText);
+        randomBtnLink.appendChild(randomBtn);
+        
+        svg.appendChild(randomBtnLink);
+    </script>
+</body>
+</html>
