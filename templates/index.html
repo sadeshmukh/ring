@@ -42,8 +42,7 @@
         
         .channel-label {
             pointer-events: none;
-            font-size: 11px;
-            font-weight: 500;
+            font-weight: bold;
         }
         
         .ring-link {
@@ -77,19 +76,28 @@
         
         const centerX = size / 2;
         const centerY = size / 2;
-        const radius = size * 0.36;
-        const boxWidth = size * 0.09;
-        const boxHeight = size * 0.033;
+        const radius = size * 0.42;
+        const boxWidth = size * 0.16;
+        const boxHeight = size * 0.038;
+        const fontSize = size * 0.018;
         
         const colors = ['#4ecdc4', '#44a8f5', '#a66cff', '#ff6b9d', '#ffbe0b', '#06ffa5'];
         
+        // distribute to sides with some adjustment for better spacing
+        function getAngle(index, total) {
+            const t = index / total;
+            const baseAngle = t * 2 * Math.PI;
+            const adjustment = -Math.cos(2 * baseAngle) * 0.15;
+            return (baseAngle + adjustment) - 3 * Math.PI / 4;
+        }
+        
         channels.forEach((channel, index) => {
-            const angle = (index / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const angle = getAngle(index, channels.length);
             const x = centerX + radius * Math.cos(angle);
             const y = centerY + radius * Math.sin(angle);
             
             const nextIndex = (index + 1) % channels.length;
-            const nextAngle = (nextIndex / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const nextAngle = getAngle(nextIndex, channels.length);
             const nextX = centerX + radius * Math.cos(nextAngle);
             const nextY = centerY + radius * Math.sin(nextAngle);
             
@@ -103,7 +111,7 @@
         });
         
         channels.forEach((channel, index) => {
-            const angle = (index / channels.length) * 2 * Math.PI - Math.PI / 2;
+            const angle = getAngle(index, channels.length);
             const x = centerX + radius * Math.cos(angle);
             const y = centerY + radius * Math.sin(angle);
             
@@ -123,11 +131,13 @@
             
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', x);
-            text.setAttribute('y', y + 4);
+            text.setAttribute('y', y);
+            text.setAttribute('dominant-baseline', 'middle');
             text.setAttribute('text-anchor', 'middle');
             text.setAttribute('fill', '#0a0a0a');
+            text.setAttribute('font-size', fontSize);
             text.classList.add('channel-label');
-            text.textContent = channel.slug.length > 10 ? channel.slug.substring(0, 9) + '…' : channel.slug;
+            text.textContent = channel.slug.length > 15 ? channel.slug.substring(0, 14) + '…' : channel.slug;
             
             g.appendChild(rect);
             g.appendChild(text);
@@ -142,18 +152,23 @@
         const randomBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         randomBtn.classList.add('random-btn');
         
+        const isSmall = size < 600;
+        const btnRadius = isSmall ? size * 0.25 : 60;
+        const btnFontSize = isSmall ? size * 0.07 : 18;
+        const btnTextOffset = btnFontSize / 3;
+
         const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         btnCircle.setAttribute('cx', centerX);
         btnCircle.setAttribute('cy', centerY);
-        btnCircle.setAttribute('r', '60');
+        btnCircle.setAttribute('r', btnRadius);
         btnCircle.setAttribute('fill', '#e0e0e0');
         
         const btnText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         btnText.setAttribute('x', centerX);
-        btnText.setAttribute('y', centerY + 6);
+        btnText.setAttribute('y', centerY + btnTextOffset);
         btnText.setAttribute('text-anchor', 'middle');
         btnText.setAttribute('fill', '#0a0a0a');
-        btnText.setAttribute('font-size', '18');
+        btnText.setAttribute('font-size', btnFontSize);
         btnText.setAttribute('font-weight', 'bold');
         btnText.textContent = 'RANDOM';
         
