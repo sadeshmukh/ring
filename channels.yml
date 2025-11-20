@@ -56,3 +56,6 @@ channels:
   - channel_id: "C08LLBLUVPH"
     user_id: "U081D39L4MD"
     slug: "sarvesh"
+  - channel_id: "C09JVVAE971"
+    user_id: "U08B1CDTWR1"
+    slug: "restaurant"
