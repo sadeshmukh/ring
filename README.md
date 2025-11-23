@@ -1,8 +1,10 @@
-# Ring
 
 The Slack Ring is an webring for Hack Club Slack personal channels.
 
-Check it out: [r.sahil.ink](https://ring.sahil.ink) or try `/ring-random` on the Hack Club Slack.
+Check it out: [r.sahil.ink](https://r.sahil.ink) or try `/ring-random` on the Hack Club Slack.
+
+Visualization of all channels (taken 11/22/25)
+<img width="1303" height="1173" alt="image" src="https://github.com/user-attachments/assets/511f71de-6050-4406-8cbf-f50ebc2e5120" />
 
 Feel free to leave a star on the repo as well!
 
